@@ -41,7 +41,7 @@ router.post("/upload-url", requireAuth, async (req: AuthRequest, res: Response) 
   }
 
   try {
-    const urls = await createVideoUploadUrl(req.userId!, parsed.data.venueId);
+    const urls = await createVideoUploadUrl(req.user!.id, parsed.data.venueId);
     return res.json(urls);
   } catch (error) {
     console.error(error);
@@ -85,7 +85,7 @@ router.post("/", requireAuth, async (req: AuthRequest, res: Response) => {
     const result = await prisma.$transaction(async (tx) => {
       const video = await tx.videoSubmission.create({
         data: {
-          userId: req.userId!,
+          userId: req.user!.id,
           venueId: parsed.data.venueId,
           videoUrl: parsed.data.videoUrl,
           duration: parsed.data.duration,
@@ -94,14 +94,14 @@ router.post("/", requireAuth, async (req: AuthRequest, res: Response) => {
 
       await tx.pointsLedger.create({
         data: {
-          userId: req.userId!,
+          userId: req.user!.id,
           type: "video",
           pointsAwarded: VIDEO_POINTS,
         },
       });
 
       const user = await tx.user.update({
-        where: { id: req.userId! },
+        where: { id: req.user!.id },
         data: { points: { increment: VIDEO_POINTS } },
       });
 

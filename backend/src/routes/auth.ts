@@ -114,7 +114,7 @@ router.post("/register", async (req: Request, res: Response) => {
 });
 
 router.get("/me", requireAuth, async (req: AuthRequest, res: Response) => {
-  const user = await prisma.user.findUnique({ where: { id: req.userId! } });
+  const user = await prisma.user.findUnique({ where: { id: req.user!.id } });
   if (!user) {
     return res.status(404).json({ error: "User not found" });
   }

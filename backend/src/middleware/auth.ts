@@ -1,11 +1,16 @@
 import { Request, Response, NextFunction } from "express";
 import jwt, { SignOptions } from "jsonwebtoken";
+import { prisma } from "../services/prisma";
 
 export interface AuthRequest extends Request {
-  userId?: string;
+  user?: { id: string; email: string };
 }
 
-export function requireAuth(req: AuthRequest, res: Response, next: NextFunction) {
+export async function requireAuth(
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+) {
   const header = req.headers.authorization;
   if (!header?.startsWith("Bearer ")) {
     return res.status(401).json({ error: "Unauthorized" });
@@ -16,7 +21,17 @@ export function requireAuth(req: AuthRequest, res: Response, next: NextFunction)
     const payload = jwt.verify(token, process.env.JWT_SECRET ?? "dev-secret") as {
       userId: string;
     };
-    req.userId = payload.userId;
+
+    const user = await prisma.user.findUnique({
+      where: { id: payload.userId },
+      select: { id: true, email: true },
+    });
+
+    if (!user) {
+      return res.status(401).json({ error: "Invalid or expired token" });
+    }
+
+    req.user = user;
     next();
   } catch {
     return res.status(401).json({ error: "Invalid or expired token" });

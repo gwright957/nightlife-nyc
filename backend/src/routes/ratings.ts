@@ -46,7 +46,7 @@ router.post("/", requireAuth, async (req: AuthRequest, res: Response) => {
     const result = await prisma.$transaction(async (tx) => {
       const rating = await tx.rating.create({
         data: {
-          userId: req.userId!,
+          userId: req.user!.id,
           venueId: parsed.data.venueId,
           litScore: parsed.data.litScore,
           genderRatio: parsed.data.genderRatio,
@@ -56,14 +56,14 @@ router.post("/", requireAuth, async (req: AuthRequest, res: Response) => {
 
       await tx.pointsLedger.create({
         data: {
-          userId: req.userId!,
+          userId: req.user!.id,
           type: "rating",
           pointsAwarded: RATING_POINTS,
         },
       });
 
       const user = await tx.user.update({
-        where: { id: req.userId! },
+        where: { id: req.user!.id },
         data: { points: { increment: RATING_POINTS } },
       });
 

@@ -15,11 +15,11 @@ const TIER_THRESHOLDS: Record<RewardTier, number> = {
 
 router.get("/progress", requireAuth, async (req: AuthRequest, res: Response) => {
   const videoCount = await prisma.videoSubmission.count({
-    where: { userId: req.userId! },
+    where: { userId: req.user!.id },
   });
 
   const claims = await prisma.rewardClaim.findMany({
-    where: { userId: req.userId! },
+    where: { userId: req.user!.id },
     orderBy: { createdAt: "desc" },
   });
 
@@ -45,7 +45,7 @@ router.post("/claim", requireAuth, async (req: AuthRequest, res: Response) => {
   }
 
   const videoCount = await prisma.videoSubmission.count({
-    where: { userId: req.userId! },
+    where: { userId: req.user!.id },
   });
 
   const required = TIER_THRESHOLDS[parsed.data.rewardTier];
@@ -57,7 +57,7 @@ router.post("/claim", requireAuth, async (req: AuthRequest, res: Response) => {
 
   const existing = await prisma.rewardClaim.findFirst({
     where: {
-      userId: req.userId!,
+      userId: req.user!.id,
       rewardTier: parsed.data.rewardTier,
     },
   });
@@ -66,7 +66,7 @@ router.post("/claim", requireAuth, async (req: AuthRequest, res: Response) => {
     return res.status(409).json({ error: "Reward already claimed", claim: existing });
   }
 
-  const user = await prisma.user.findUnique({ where: { id: req.userId! } });
+  const user = await prisma.user.findUnique({ where: { id: req.user!.id } });
   if (!user) {
     return res.status(404).json({ error: "User not found" });
   }
@@ -74,7 +74,7 @@ router.post("/claim", requireAuth, async (req: AuthRequest, res: Response) => {
   try {
     const claim = await prisma.rewardClaim.create({
       data: {
-        userId: req.userId!,
+        userId: req.user!.id,
         rewardTier: parsed.data.rewardTier,
       },
     });
