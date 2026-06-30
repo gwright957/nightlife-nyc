@@ -1,0 +1,22 @@
+---
+description: Open Xcode after mobile app changes so the user can Build
+globs: mobile/**/*
+alwaysApply: false
+---
+
+# Open Xcode After Mobile Updates
+
+When you finish changes under `mobile/` (screens, navigation, services, config, etc.):
+
+1. Run from the repo root:
+   ```bash
+   bash mobile/scripts/open-xcode.sh
+   ```
+2. Tell the user Xcode was opened and they can click **Product → Run** (⌘R) to build.
+3. Do this at the end of the task — do not skip it for mobile UI/flow changes.
+
+Notes:
+- JS/TS changes are on disk; Xcode Release builds bundle them on Build.
+- Workspace path: `mobile/ios/NightLifeNYC.xcworkspace` (always open the `.xcworkspace`, not `.xcodeproj`).
+- If `ios/` is missing, run `cd mobile && npx expo prebuild --platform ios` first, then open Xcode.
+- Backend-only changes do not require opening Xcode.
