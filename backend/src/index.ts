@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 dotenv.config();
 
-import express from "express";
+import express, { Request, Response } from "express";
 import cors from "cors";
 import authRoutes from "./routes/auth";
 import venueRoutes from "./routes/venues";
@@ -20,7 +20,7 @@ app.use(
 );
 app.use(express.json());
 
-app.get("/health", (_req, res) => {
+app.get("/health", (_req: Request, res: Response) => {
   res.json({ ok: true, service: "nightlife-nyc-api" });
 });
 

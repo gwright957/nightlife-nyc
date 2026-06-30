@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { Router, Response } from "express";
 import { z } from "zod";
 import { prisma } from "../services/prisma";
 import { requireAuth, AuthRequest } from "../middleware/auth";
@@ -10,7 +10,7 @@ const router = Router();
 const VIDEO_POINTS = 25;
 const MAX_DURATION_SECONDS = 10;
 
-router.post("/upload-url", requireAuth, async (req: AuthRequest, res) => {
+router.post("/upload-url", requireAuth, async (req: AuthRequest, res: Response) => {
   const schema = z.object({
     venueId: z.string(),
     lat: z.number(),
@@ -49,7 +49,7 @@ router.post("/upload-url", requireAuth, async (req: AuthRequest, res) => {
   }
 });
 
-router.post("/", requireAuth, async (req: AuthRequest, res) => {
+router.post("/", requireAuth, async (req: AuthRequest, res: Response) => {
   const schema = z.object({
     venueId: z.string(),
     videoUrl: z.string().url(),

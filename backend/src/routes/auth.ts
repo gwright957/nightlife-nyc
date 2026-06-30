@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { Router, Request, Response } from "express";
 import { z } from "zod";
 import { prisma } from "../services/prisma";
 import { createAndSendOtp, normalizeEmail, verifyOtpCode } from "../services/otp";
@@ -9,7 +9,7 @@ const router = Router();
 
 const emailSchema = z.string().email().transform(normalizeEmail);
 
-router.post("/send-otp", async (req, res) => {
+router.post("/send-otp", async (req: Request, res: Response) => {
   const schema = z.object({ email: emailSchema });
 
   const parsed = schema.safeParse(req.body);
@@ -36,7 +36,7 @@ router.post("/send-otp", async (req, res) => {
   }
 });
 
-router.post("/verify-otp", async (req, res) => {
+router.post("/verify-otp", async (req: Request, res: Response) => {
   const schema = z.object({
     email: emailSchema,
     code: z.string().length(6),
@@ -74,7 +74,7 @@ router.post("/verify-otp", async (req, res) => {
   }
 });
 
-router.post("/register", async (req, res) => {
+router.post("/register", async (req: Request, res: Response) => {
   const schema = z.object({
     email: emailSchema,
     username: z.string().min(3).max(20).regex(/^[a-zA-Z0-9_]+$/),
@@ -113,7 +113,7 @@ router.post("/register", async (req, res) => {
   }
 });
 
-router.get("/me", requireAuth, async (req: AuthRequest, res) => {
+router.get("/me", requireAuth, async (req: AuthRequest, res: Response) => {
   const user = await prisma.user.findUnique({ where: { id: req.userId! } });
   if (!user) {
     return res.status(404).json({ error: "User not found" });
@@ -121,7 +121,7 @@ router.get("/me", requireAuth, async (req: AuthRequest, res) => {
   return res.json({ user });
 });
 
-router.post("/demo", async (_req, res) => {
+router.post("/demo", async (_req: Request, res: Response) => {
   if (process.env.NODE_ENV === "production" && process.env.DEMO_AUTH_ENABLED !== "true") {
     return res.status(404).json({ error: "Not found" });
   }
@@ -151,7 +151,7 @@ router.post("/demo", async (_req, res) => {
 const DEV_TEST_EMAIL = "test@gmail.com";
 const DEV_TEST_PASSWORD = "test123";
 
-router.post("/dev-login", async (req, res) => {
+router.post("/dev-login", async (req: Request, res: Response) => {
   if (process.env.NODE_ENV === "production" && process.env.DEMO_AUTH_ENABLED !== "true") {
     return res.status(404).json({ error: "Not found" });
   }

@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { Router, Response } from "express";
 import { z } from "zod";
 import { RewardTier } from "@prisma/client";
 import { prisma } from "../services/prisma";
@@ -13,7 +13,7 @@ const TIER_THRESHOLDS: Record<RewardTier, number> = {
   tier_3: 10,
 };
 
-router.get("/progress", requireAuth, async (req: AuthRequest, res) => {
+router.get("/progress", requireAuth, async (req: AuthRequest, res: Response) => {
   const videoCount = await prisma.videoSubmission.count({
     where: { userId: req.userId! },
   });
@@ -34,7 +34,7 @@ router.get("/progress", requireAuth, async (req: AuthRequest, res) => {
   return res.json({ videoCount, tiers });
 });
 
-router.post("/claim", requireAuth, async (req: AuthRequest, res) => {
+router.post("/claim", requireAuth, async (req: AuthRequest, res: Response) => {
   const schema = z.object({
     rewardTier: z.nativeEnum(RewardTier),
   });

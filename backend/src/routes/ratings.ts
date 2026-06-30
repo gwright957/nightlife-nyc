@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { Router, Response } from "express";
 import { z } from "zod";
 import { LineLength } from "@prisma/client";
 import { prisma } from "../services/prisma";
@@ -11,7 +11,7 @@ const RATING_POINTS = 10;
 const OUT_OF_RANGE_MESSAGE =
   "Please make sure you are within range of this establishment";
 
-router.post("/", requireAuth, async (req: AuthRequest, res) => {
+router.post("/", requireAuth, async (req: AuthRequest, res: Response) => {
   const schema = z.object({
     venueId: z.string(),
     litScore: z.number().int().min(1).max(10),

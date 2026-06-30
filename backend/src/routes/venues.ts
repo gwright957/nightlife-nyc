@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { Router, Request, Response } from "express";
 import { z } from "zod";
 import { prisma } from "../services/prisma";
 import { requireAuth, AuthRequest } from "../middleware/auth";
@@ -10,12 +10,12 @@ import { computeVenueHeatScore, getTonightSince } from "../utils/tonight";
 
 const router = Router();
 
-router.get("/", async (_req, res) => {
+router.get("/", async (_req: Request, res: Response) => {
   const venues = await prisma.venue.findMany({ orderBy: { name: "asc" } });
   return res.json({ venues });
 });
 
-router.get("/nearby", requireAuth, async (req: AuthRequest, res) => {
+router.get("/nearby", requireAuth, async (req: AuthRequest, res: Response) => {
   const schema = z.object({
     lat: z.coerce.number().min(-90).max(90),
     lng: z.coerce.number().min(-180).max(180),
@@ -46,7 +46,7 @@ router.get("/nearby", requireAuth, async (req: AuthRequest, res) => {
   return res.json({ venues: nearby });
 });
 
-router.get("/hottest", async (_req, res) => {
+router.get("/hottest", async (_req: Request, res: Response) => {
   const since = getTonightSince();
   const venues = await prisma.venue.findMany();
   const ratings = await prisma.rating.findMany({
@@ -79,7 +79,7 @@ router.get("/hottest", async (_req, res) => {
   return res.json({ venues: heatScores.slice(0, 20) });
 });
 
-router.get("/search", async (req, res) => {
+router.get("/search", async (req: Request, res: Response) => {
   const q = String(req.query.q ?? "").trim();
   if (!q) {
     return res.json({ venues: [] });
@@ -94,10 +94,14 @@ router.get("/search", async (req, res) => {
   return res.json({ venues });
 });
 
-router.get("/:id/tonight", async (req, res) => {
+router.get("/:id/tonight", async (req: Request, res: Response) => {
   const since = getTonightSince();
+  const venueId = req.params.id;
+  if (typeof venueId !== "string") {
+    return res.status(400).json({ error: "Invalid venue id" });
+  }
 
-  const venue = await prisma.venue.findUnique({ where: { id: req.params.id } });
+  const venue = await prisma.venue.findUnique({ where: { id: venueId } });
   if (!venue) {
     return res.status(404).json({ error: "Venue not found" });
   }
