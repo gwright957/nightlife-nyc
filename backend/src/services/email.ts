@@ -2,7 +2,7 @@ import { Resend } from "resend";
 import { RewardTier } from "@prisma/client";
 
 const REWARD_LABELS: Record<RewardTier, string> = {
-  tier_1: "5 videos — 1 free drink",
+  tier_1: "Invite 3 friends — 1 free drink",
   tier_2: "7 videos — 2 free drinks",
   tier_3: "10 videos — 3 free drinks",
 };

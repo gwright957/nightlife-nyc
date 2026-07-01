@@ -1,0 +1,25 @@
+{
+  "migIndex": 1,
+  "data": [
+    {
+      "path": "assets/fonts/JosefinSans_300Light.ttf",
+      "sha1": "04bc56f4bebf0aec546d7555a278590055a057e7"
+    },
+    {
+      "path": "assets/fonts/JosefinSans_400Regular.ttf",
+      "sha1": "675a4c882e3946047c042c83c66fa803e5aa6554"
+    },
+    {
+      "path": "assets/fonts/JosefinSans_500Medium.ttf",
+      "sha1": "a8b8f3878775c64b332c11bc9a66759eeb0537a0"
+    },
+    {
+      "path": "assets/fonts/JosefinSans_600SemiBold.ttf",
+      "sha1": "e52027fd05145d1a41447690f745666c83f91e9e"
+    },
+    {
+      "path": "assets/fonts/JosefinSans_700Bold.ttf",
+      "sha1": "d94bebbdb9af646a3f8b206e89e53a31535d88c6"
+    }
+  ]
+}

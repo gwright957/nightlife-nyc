@@ -36,19 +36,27 @@ enum RewardClaimStatus {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  username  String   @unique
-  fullName  String
-  birthday  DateTime
-  points    Int      @default(0)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           String   @id @default(cuid())
+  email        String   @unique
+  username     String   @unique
+  fullName     String
+  birthday     DateTime
+  points       Int      @default(0)
+  referralCode String   @unique
+  referredById String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
+  referredBy       User?      @relation("UserReferrals", fields: [referredById], references: [id], onDelete: SetNull)
+  referralsMade    User[]     @relation("UserReferrals")
+  referrals        Referral[] @relation("ReferrerReferrals")
+  referralReceived Referral?  @relation("ReferredUserReferral")
   ratings          Rating[]
   videoSubmissions VideoSubmission[]
   pointsLedger     PointsLedger[]
   rewardClaims     RewardClaim[]
+
+  @@index([referredById])
 }
 
 model OtpCode {
@@ -136,4 +144,18 @@ model RewardClaim {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+}
+
+model Referral {
+  id             String   @id @default(cuid())
+  referrerId     String
+  referredUserId String   @unique
+  referredEmail  String   @unique
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  referrer     User @relation("ReferrerReferrals", fields: [referrerId], references: [id], onDelete: Cascade)
+  referredUser User @relation("ReferredUserReferral", fields: [referredUserId], references: [id], onDelete: Cascade)
+
+  @@index([referrerId])
 }

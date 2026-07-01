@@ -10,6 +10,20 @@ const router = Router();
 const VIDEO_POINTS = 25;
 const MAX_DURATION_SECONDS = 10;
 
+router.get("/me", requireAuth, async (req: AuthRequest, res: Response) => {
+  const videos = await prisma.videoSubmission.findMany({
+    where: { userId: req.user!.id },
+    orderBy: { createdAt: "desc" },
+    include: {
+      venue: {
+        select: { id: true, name: true },
+      },
+    },
+  });
+
+  return res.json({ videos });
+});
+
 router.post("/upload-url", requireAuth, async (req: AuthRequest, res: Response) => {
   const schema = z.object({
     venueId: z.string(),

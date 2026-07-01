@@ -9,6 +9,7 @@ import ratingRoutes from "./routes/ratings";
 import videoRoutes from "./routes/videos";
 import leaderboardRoutes from "./routes/leaderboard";
 import rewardRoutes from "./routes/rewards";
+import referralRoutes from "./routes/referrals";
 
 const app = express();
 const port = process.env.PORT ?? 3001;
@@ -30,6 +31,7 @@ app.use("/api/ratings", ratingRoutes);
 app.use("/api/videos", videoRoutes);
 app.use("/api/leaderboard", leaderboardRoutes);
 app.use("/api/rewards", rewardRoutes);
+app.use("/api/referrals", referralRoutes);
 
 app.listen(Number(port), "0.0.0.0", () => {
   console.log(`NightLife NYC API running on port ${port}`);

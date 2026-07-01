@@ -75,3 +75,22 @@ export async function verifyOtpCode(
 
   return true;
 }
+
+export async function hasRecentVerifiedOtp(
+  email: string,
+  withinMinutes = 30
+): Promise<boolean> {
+  const normalized = normalizeEmail(email);
+  const since = new Date(Date.now() - withinMinutes * 60 * 1000);
+
+  const otp = await prisma.otpCode.findFirst({
+    where: {
+      email: normalized,
+      used: true,
+      updatedAt: { gte: since },
+    },
+    orderBy: { updatedAt: "desc" },
+  });
+
+  return !!otp;
+}
