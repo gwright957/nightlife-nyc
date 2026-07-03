@@ -18,5 +18,6 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: spacing.screen,
+    paddingTop: spacing.quarterInch,
   },
 });

@@ -25,5 +25,6 @@ const styles = StyleSheet.create({
     marginBottom: scale(20),
     alignSelf: "stretch",
     width: "100%",
+    textTransform: "lowercase",
   },
 });

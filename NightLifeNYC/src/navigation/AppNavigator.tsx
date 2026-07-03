@@ -18,6 +18,8 @@ import { SubmitScreen } from "../screens/SubmitScreen";
 import { LeaderboardScreen } from "../screens/LeaderboardScreen";
 import { RewardsScreen } from "../screens/RewardsScreen";
 import { ProfileScreen } from "../screens/ProfileScreen";
+import { InboxScreen } from "../screens/InboxScreen";
+import { FriendsScreen } from "../screens/FriendsScreen";
 import { RatingScreen } from "../screens/RatingScreen";
 import { VenueDetailScreen } from "../screens/VenueDetailScreen";
 import {
@@ -173,6 +175,16 @@ function MainNavigator() {
         name="VenueDetail"
         component={VenueDetailScreen}
         options={{ title: "Venue" }}
+      />
+      <RootStack.Screen
+        name="Inbox"
+        component={InboxScreen}
+        options={{ headerShown: false }}
+      />
+      <RootStack.Screen
+        name="Friends"
+        component={FriendsScreen}
+        options={{ headerShown: false }}
       />
     </RootStack.Navigator>
   );

@@ -11,14 +11,14 @@ export const colors = {
   text: "#FFFFFF",
   textSecondary: "#888888",
   textMuted: "#999999",
-  orange: "#FF5C00",
-  /** Alias — use `orange` for new code */
-  red: "#FF5C00",
-  redBright: "#FF5C00",
-  pink: "#FF5C00",
-  coral: "#FF5C00",
-  cyan: "#FF5C00",
-  teal: "#FF5C00",
+  orange: "#F59E0B",
+  /** Alias — accent color (gold) */
+  red: "#F59E0B",
+  redBright: "#F59E0B",
+  pink: "#F59E0B",
+  coral: "#F59E0B",
+  cyan: "#F59E0B",
+  teal: "#F59E0B",
   gold: "#F59E0B",
   silver: "#94A3B8",
   bronze: "#D97706",
@@ -40,6 +40,8 @@ export const spacing = {
   lg: scale(24),
   xl: scale(32),
   xxl: scale(40),
+  /** ~1/4 inch vertical offset */
+  quarterInch: scale(18),
   /** Consistent horizontal screen padding */
   screen: scale(20),
 };

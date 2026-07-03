@@ -20,4 +20,6 @@ export type RootStackParamList = {
   Leaderboard: undefined;
   Rating: { venue: NearbyVenue | Venue };
   VenueDetail: { venueId: string };
+  Inbox: undefined;
+  Friends: undefined;
 };
