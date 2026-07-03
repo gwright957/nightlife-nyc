@@ -20,30 +20,15 @@ import { useAuthStore } from "../store/authStore";
 import { scale } from "../utils/scale";
 import { LeaderboardEntry, RewardTierProgress } from "../types";
 import { buildReferralShareMessage } from "../utils/referralShare";
+import { buildChallenges, CHALLENGE_COUNT } from "../utils/challenges";
 
 type Section = "rewards" | "rankings";
-
-function tierStatus(tier: RewardTierProgress): "locked" | "ready" | "claimed" {
-  if (tier.claim) return "claimed";
-  if (tier.unlocked) return "ready";
-  return "locked";
-}
 
 function rankStyle(rank: number) {
   if (rank <= 3) {
     return { color: colors.orange, fontWeight: "800" as const };
   }
   return { color: colors.text, fontWeight: "700" as const };
-}
-
-function tierProgressLabel(tier: RewardTierProgress): string {
-  if (tier.type === "referral") {
-    const required = tier.requiredReferrals ?? 3;
-    const current = Math.min(tier.currentProgress, required);
-    return `${current} of ${required} friends referred`;
-  }
-  const current = Math.min(tier.currentProgress, tier.requiredVideos);
-  return `${current} of ${tier.requiredVideos} videos`;
 }
 
 function SectionToggle({
@@ -144,10 +129,9 @@ export function RewardsScreen() {
 
   const inReferralPhase = !referralPhaseComplete;
   const nextTier = tiers.find((t) => !t.unlocked && !t.claim);
-  const nextTierIndex = tiers.findIndex((t) => !t.unlocked && !t.claim);
+  const challenges = buildChallenges(tiers);
+  const currentChallenge = challenges[rewardIndex];
   const currentTier = tiers[rewardIndex];
-  const isHiddenReward =
-    nextTierIndex !== -1 && rewardIndex > nextTierIndex;
 
   const heroLabel = inReferralPhase ? "Friends referred" : "Videos submitted";
   const heroValue = inReferralPhase ? friendsReferred : videoCount;
@@ -188,11 +172,11 @@ export function RewardsScreen() {
   };
 
   const goPrevReward = () => {
-    setRewardIndex((i) => (i > 0 ? i - 1 : tiers.length - 1));
+    setRewardIndex((i) => (i > 0 ? i - 1 : CHALLENGE_COUNT - 1));
   };
 
   const goNextReward = () => {
-    setRewardIndex((i) => (i < tiers.length - 1 ? i + 1 : 0));
+    setRewardIndex((i) => (i < CHALLENGE_COUNT - 1 ? i + 1 : 0));
   };
 
   return (
@@ -263,7 +247,7 @@ export function RewardsScreen() {
               <Text style={styles.heroMeta}>{heroMeta}</Text>
             </View>
 
-            {currentTier ? (
+            {currentChallenge ? (
               <View style={styles.rewardPager}>
                 <TouchableOpacity onPress={goPrevReward} style={styles.pagerBtn} hitSlop={12}>
                   <Text style={styles.pagerArrow}>‹</Text>
@@ -272,54 +256,51 @@ export function RewardsScreen() {
                 <View
                   style={[
                     styles.rewardRow,
-                    !isHiddenReward && tierStatus(currentTier) === "ready" && styles.rewardRowReady,
-                    !isHiddenReward && tierStatus(currentTier) === "claimed" && styles.rewardRowClaimed,
+                    currentChallenge.isLockedPreview && styles.rewardRowLocked,
+                    !currentChallenge.isLockedPreview &&
+                      currentChallenge.isReady &&
+                      styles.rewardRowReady,
+                    !currentChallenge.isLockedPreview &&
+                      currentChallenge.isClaimed &&
+                      styles.rewardRowClaimed,
                   ]}
                 >
-                  {isHiddenReward ? (
-                    <Text style={styles.rewardHidden}>please complete previous challenge</Text>
+                  {currentChallenge.isLockedPreview ? (
+                    <View style={styles.rewardLockedContent}>
+                      <Text style={styles.challengeLabel}>
+                        challenge {currentChallenge.number}
+                      </Text>
+                      <Text style={styles.rewardLocked}>locked</Text>
+                    </View>
                   ) : (
-                    (() => {
-                      const status = tierStatus(currentTier);
-                      const [requirement, reward] = currentTier.label.split(" — ");
-                      const isReferralTier = currentTier.type === "referral";
-                      return (
-                        <>
-                          <View style={styles.rewardMain}>
-                            <Text style={styles.rewardTitle}>{reward ?? currentTier.label}</Text>
-                            <Text style={styles.rewardReq}>
-                              {isReferralTier
-                                ? "invite three friends"
-                                : requirement ?? currentTier.label}
-                            </Text>
-                            <Text style={styles.rewardProgress}>
-                              {tierProgressLabel(currentTier)}
+                    <>
+                      <View style={styles.rewardMain}>
+                        <Text style={styles.challengeLabel}>
+                          challenge {currentChallenge.number}
+                        </Text>
+                        <Text style={styles.rewardTitle}>{currentChallenge.reward}</Text>
+                        <Text style={styles.rewardReq}>{currentChallenge.requirement}</Text>
+                        <Text style={styles.rewardProgress}>
+                          {currentChallenge.progressLabel}
+                        </Text>
+                      </View>
+                      <View style={styles.rewardAside}>
+                        {currentChallenge.isClaimed && currentTier ? (
+                          <View style={[styles.badge, styles.badgeClaimed]}>
+                            <Text style={styles.badgeTextClaimed}>
+                              {currentTier.claim?.status ?? "Claimed"}
                             </Text>
                           </View>
-                          <View style={styles.rewardAside}>
-                            {status === "locked" && (
-                              <View style={[styles.badge, styles.badgeLocked]}>
-                                <Text style={styles.badgeTextLocked}>Locked</Text>
-                              </View>
-                            )}
-                            {status === "claimed" && (
-                              <View style={[styles.badge, styles.badgeClaimed]}>
-                                <Text style={styles.badgeTextClaimed}>
-                                  {currentTier.claim?.status ?? "Claimed"}
-                                </Text>
-                              </View>
-                            )}
-                            {status === "ready" && (
-                              <Button
-                                title="Claim"
-                                onPress={() => handleClaim(currentTier)}
-                                loading={claiming === currentTier.tier}
-                              />
-                            )}
-                          </View>
-                        </>
-                      );
-                    })()
+                        ) : null}
+                        {currentChallenge.isReady && currentTier ? (
+                          <Button
+                            title="Claim"
+                            onPress={() => handleClaim(currentTier)}
+                            loading={claiming === currentTier.tier}
+                          />
+                        ) : null}
+                      </View>
+                    </>
                   )}
                 </View>
 
@@ -329,16 +310,14 @@ export function RewardsScreen() {
               </View>
             ) : null}
 
-            {tiers.length > 1 ? (
-              <View style={styles.dots}>
-                {tiers.map((tier, index) => (
-                  <View
-                    key={tier.tier}
-                    style={[styles.dot, index === rewardIndex && styles.dotActive]}
-                  />
-                ))}
-              </View>
-            ) : null}
+            <View style={styles.dots}>
+              {challenges.map((challenge, index) => (
+                <View
+                  key={`challenge-dot-${challenge.number}`}
+                  style={[styles.dot, index === rewardIndex && styles.dotActive]}
+                />
+              ))}
+            </View>
           </>
         )}
       </ScrollView>
@@ -503,8 +482,10 @@ const styles = StyleSheet.create({
   rewardPager: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
     gap: spacing.sm,
     width: "100%",
+    alignSelf: "center",
   },
   pagerBtn: {
     width: scale(28),
@@ -520,16 +501,33 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
     padding: spacing.lg,
     gap: spacing.md,
+    minHeight: scale(120),
   },
-  rewardHidden: {
+  rewardRowLocked: {
+    justifyContent: "center",
+  },
+  rewardLockedContent: {
     flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: spacing.sm,
+  },
+  challengeLabel: {
+    color: colors.text,
+    fontSize: scale(13),
+    fontWeight: "700",
+    textTransform: "lowercase",
+    marginBottom: spacing.xs,
+  },
+  rewardLocked: {
     color: colors.textSecondary,
     fontSize: scale(15),
     fontWeight: "600",
-    textAlign: "center",
     textTransform: "lowercase",
+    textAlign: "center",
   },
   rewardRowReady: {
     borderColor: colors.orange,
@@ -563,14 +561,6 @@ const styles = StyleSheet.create({
     borderRadius: radii.full,
     paddingHorizontal: spacing.sm,
     paddingVertical: 6,
-  },
-  badgeLocked: {
-    backgroundColor: colors.surfaceLight,
-  },
-  badgeTextLocked: {
-    color: colors.textSecondary,
-    fontSize: scale(12),
-    fontWeight: "700",
   },
   badgeClaimed: {
     backgroundColor: colors.surfaceLight,

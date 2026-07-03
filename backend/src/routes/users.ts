@@ -8,7 +8,7 @@ const router = Router();
 
 router.get("/search", requireAuth, async (req: AuthRequest, res: Response) => {
   const q = String(req.query.q ?? "").trim();
-  if (q.length < 2) {
+  if (q.length < 1) {
     return res.json({ users: [] });
   }
 

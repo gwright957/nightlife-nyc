@@ -42,7 +42,7 @@ export function SearchScreen() {
     section === "parties" ? "find parties" : "find friends";
 
   const runSearch = async (text: string, activeSection: SearchSection) => {
-    if (text.length < 2) {
+    if (text.length < 1) {
       setVenues([]);
       setUsers([]);
       return;
@@ -167,7 +167,7 @@ export function SearchScreen() {
           )}
           ItemSeparatorComponent={() => <View style={styles.divider} />}
           ListEmptyComponent={
-            query.length >= 2 && !loading ? (
+            query.length >= 1 && !loading ? (
               <Text style={styles.empty}>No venues found</Text>
             ) : null
           }
@@ -188,7 +188,7 @@ export function SearchScreen() {
           )}
           ItemSeparatorComponent={() => <View style={styles.divider} />}
           ListEmptyComponent={
-            query.length >= 2 && !loading ? (
+            query.length >= 1 && !loading ? (
               <Text style={styles.empty}>No users found</Text>
             ) : null
           }
