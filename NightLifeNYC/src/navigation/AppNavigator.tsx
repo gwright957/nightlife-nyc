@@ -2,15 +2,12 @@ import { NavigationContainer, DarkTheme } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Ionicons from "react-native-vector-icons/Ionicons";
-import {
-  ActivityIndicator,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { useEffect } from "react";
+import { StyleSheet, View } from "react-native";
 import { colors, spacing } from "../theme";
 import { scale } from "../utils/scale";
 import { useAuthStore } from "../store/authStore";
+import { useNotificationsStore } from "../store/notificationsStore";
 import { EmailScreen } from "../screens/auth/EmailScreen";
 import { OtpScreen } from "../screens/auth/OtpScreen";
 import { ProfileSetupScreen } from "../screens/auth/ProfileSetupScreen";
@@ -56,7 +53,25 @@ function SubmitTabIcon() {
   );
 }
 
+function ProfileTabIcon({ color, hasUnread }: { color: string; hasUnread: boolean }) {
+  return (
+    <View>
+      <Ionicons name="person" size={TAB_ICON_SIZE} color={color} />
+      {hasUnread ? <View style={styles.notificationDot} /> : null}
+    </View>
+  );
+}
+
 function MainTabs() {
+  const refreshUnreadCount = useNotificationsStore((s) => s.refreshUnreadCount);
+  const unreadCount = useNotificationsStore((s) => s.unreadCount);
+
+  useEffect(() => {
+    refreshUnreadCount();
+    const interval = setInterval(refreshUnreadCount, 30000);
+    return () => clearInterval(interval);
+  }, [refreshUnreadCount]);
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -83,11 +98,14 @@ function MainTabs() {
             return <SubmitTabIcon />;
           }
 
+          if (route.name === "Profile") {
+            return <ProfileTabIcon color={color} hasUnread={unreadCount > 0} />;
+          }
+
           const icons: Record<string, string> = {
             Home: "flame",
             Search: "search",
             Rewards: "star-outline",
-            Profile: "person",
           };
           const iconName = icons[route.name] ?? "ellipse";
           return <Ionicons name={iconName} size={TAB_ICON_SIZE} color={color} />;
@@ -162,23 +180,6 @@ function MainNavigator() {
 
 export function Navigation() {
   const token = useAuthStore((s) => s.token);
-  const isLoading = useAuthStore((s) => s.isLoading);
-
-  if (isLoading) {
-    return (
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: colors.background,
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <ActivityIndicator size="large" color={colors.orange} />
-        <Text style={{ color: colors.textMuted, marginTop: 16 }}>Loading...</Text>
-      </View>
-    );
-  }
 
   return (
     <NavigationContainer theme={navTheme}>
@@ -195,5 +196,16 @@ const styles = StyleSheet.create({
     backgroundColor: colors.orange,
     alignItems: "center",
     justifyContent: "center",
+  },
+  notificationDot: {
+    position: "absolute",
+    top: -2,
+    right: -4,
+    width: scale(8),
+    height: scale(8),
+    borderRadius: scale(4),
+    backgroundColor: colors.error,
+    borderWidth: 1,
+    borderColor: colors.tabBar,
   },
 });

@@ -11,6 +11,11 @@ import type {
   UserVideo,
   LineLength,
   RewardTier,
+  UserSearchResult,
+  FriendProfile,
+  FriendVideo,
+  AppNotification,
+  UserRelationshipStatus,
 } from '../types';
 import { ApiError } from '../utils/apiErrors';
 
@@ -281,6 +286,47 @@ export const api = {
     request<{ claim: { id: string; status: string } }>('/api/rewards/claim', {
       method: 'POST',
       body: JSON.stringify({ rewardTier }),
+    }),
+
+  searchUsers: (q: string) =>
+    request<{ users: UserSearchResult[] }>(
+      `/api/users/search?q=${encodeURIComponent(q)}`,
+    ),
+
+  sendFriendRequest: (toUserId: string) =>
+    request<{ request: { id: string } }>('/api/friends/requests', {
+      method: 'POST',
+      body: JSON.stringify({ toUserId }),
+    }),
+
+  acceptFriendRequest: (requestId: string) =>
+    request<{ ok: boolean }>(`/api/friends/requests/${requestId}/accept`, {
+      method: 'POST',
+    }),
+
+  declineFriendRequest: (requestId: string) =>
+    request<{ ok: boolean }>(`/api/friends/requests/${requestId}/decline`, {
+      method: 'POST',
+    }),
+
+  getFriends: () => request<{ friends: FriendProfile[] }>('/api/friends'),
+
+  getFriendsFeed: () => request<{ videos: FriendVideo[] }>('/api/friends/feed'),
+
+  getNotifications: () =>
+    request<{ notifications: AppNotification[] }>('/api/notifications'),
+
+  getUnreadNotificationCount: () =>
+    request<{ count: number }>('/api/notifications/unread-count'),
+
+  markNotificationRead: (id: string) =>
+    request<{ ok: boolean }>(`/api/notifications/${id}/read`, {
+      method: 'POST',
+    }),
+
+  markAllNotificationsRead: () =>
+    request<{ ok: boolean }>('/api/notifications/read-all', {
+      method: 'POST',
     }),
 };
 

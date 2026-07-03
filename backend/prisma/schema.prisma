@@ -35,6 +35,18 @@ enum RewardClaimStatus {
   contacted
 }
 
+enum FriendRequestStatus {
+  pending
+  accepted
+  declined
+  cancelled
+}
+
+enum NotificationType {
+  friend_request_received
+  friend_request_accepted
+}
+
 model User {
   id           String   @id @default(cuid())
   email        String   @unique
@@ -55,6 +67,12 @@ model User {
   videoSubmissions VideoSubmission[]
   pointsLedger     PointsLedger[]
   rewardClaims     RewardClaim[]
+  friendshipsA     Friendship[]    @relation("FriendshipUserA")
+  friendshipsB     Friendship[]    @relation("FriendshipUserB")
+  sentFriendRequests     FriendRequest[] @relation("SentFriendRequests")
+  receivedFriendRequests FriendRequest[] @relation("ReceivedFriendRequests")
+  notifications          Notification[]
+  notificationsActed     Notification[]  @relation("NotificationActor")
 
   @@index([referredById])
 }
@@ -158,4 +176,53 @@ model Referral {
   referredUser User @relation("ReferredUserReferral", fields: [referredUserId], references: [id], onDelete: Cascade)
 
   @@index([referrerId])
+}
+
+model Friendship {
+  id        String   @id @default(cuid())
+  userAId   String
+  userBId   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userA User @relation("FriendshipUserA", fields: [userAId], references: [id], onDelete: Cascade)
+  userB User @relation("FriendshipUserB", fields: [userBId], references: [id], onDelete: Cascade)
+
+  @@unique([userAId, userBId])
+  @@index([userAId])
+  @@index([userBId])
+}
+
+model FriendRequest {
+  id          String              @id @default(cuid())
+  fromUserId  String
+  toUserId    String
+  status      FriendRequestStatus @default(pending)
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  respondedAt DateTime?
+
+  fromUser User @relation("SentFriendRequests", fields: [fromUserId], references: [id], onDelete: Cascade)
+  toUser   User @relation("ReceivedFriendRequests", fields: [toUserId], references: [id], onDelete: Cascade)
+
+  @@unique([fromUserId, toUserId])
+  @@index([toUserId, status])
+  @@index([fromUserId])
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  type      NotificationType
+  actorId   String?
+  entityId  String?
+  readAt    DateTime?
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  actor User? @relation("NotificationActor", fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([userId, readAt, createdAt])
+  @@index([userId, createdAt])
 }

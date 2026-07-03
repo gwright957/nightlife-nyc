@@ -77,3 +77,43 @@ export interface UserVideo {
   createdAt: string;
   venue: { id: string; name: string };
 }
+
+export type UserRelationshipStatus =
+  | "none"
+  | "friends"
+  | "pending_sent"
+  | "pending_received";
+
+export interface UserSearchResult {
+  id: string;
+  username: string;
+  fullName: string;
+  relationshipStatus: UserRelationshipStatus;
+}
+
+export interface FriendProfile {
+  id: string;
+  username: string;
+  fullName: string;
+  points: number;
+}
+
+export interface FriendVideo {
+  id: string;
+  videoUrl: string;
+  duration: number;
+  createdAt: string;
+  user: { id: string; username: string; fullName: string };
+  venue: { id: string; name: string; type: VenueType };
+}
+
+export type NotificationType = "friend_request_received" | "friend_request_accepted";
+
+export interface AppNotification {
+  id: string;
+  type: NotificationType;
+  entityId: string | null;
+  readAt: string | null;
+  createdAt: string;
+  actor: { id: string; username: string; fullName: string } | null;
+}
